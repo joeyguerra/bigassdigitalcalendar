@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <base href="./"/>
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src https:"/>-->
+    <title>A Big Ass Digital Calendar</title>
+    <meta name="author" content="Joey Guerra"/>
+    <meta name="description" content="This is a 38x46 inch calendar that shows all 365 days"/>
+    <meta property="og:title" content="A Big Ass Digital Calendar"/>
+    <meta property="og:description" content="This is a 38x46 inch calendar that shows all 365 days"/>
+    <meta property="og:image" content="/imgs/joey-g-boss-pic.jpg"/>
+    <meta property="og:site_name" content="A Big Ass Digital Calendar"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+    <link rel="apple-touch-icon" href="favicon_package_v0/apple-touch-icon.png"/>
+    <meta name="msapplication-TileColor" content="#da532c"/>
+    <meta name="theme-color" content="#ffffff"/>
+    <meta name="apple-mobile-web-app-title" content="Joey Guerra"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon_package_v0/apple-touch-icon.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon_package_v0/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon_package_v0/favicon-16x16.png"/>
+    <link rel="manifest" href="favicon_package_v0/site.webmanifest"/>
+    <link rel="mask-icon" href="favicon_package_v0/safari-pinned-tab.svg" color="#5bbad5"/>
+    <link rel="shortcut icon" href="favicon_package_v0/favicon.ico"/>
+    <link rel="apple-touch-startup-image" href="launch.png"/>
+    <link rel="canonical" href="https://bigassdigitalcalendar.com/"/>
+    <link rel="preload" href="HubotSans/Hubot-Sans.woff2" as="font" type="font/woff2" crossorigin>
+  </head>
+  <style>
+    @font-face {
+      font-family: 'Hubot Sans';
+      src:
+        url('HubotSans/Hubot-Sans.woff2') format('woff2 supports variations'),
+        url('HubotSans/Hubot-Sans.woff2') format('woff2-variations');
+      font-weight: 200 900;
+      font-stretch: 75% 125%;
+    }
+    html, body {
+      font-family: "Hubot Sans","Hubot Sans Header Fallback",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    }
+
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <body>
+    <header>
+      <h1>A Big Ass Digital Calendar</h1>
+    </header>
+    <main role="main">
+      <meta itemprop="title" content="A Big Ass Digital Calendar">
+<meta itemprop="summary" content="This is a 38x46 inch calendar that shows all 365 days">
+<meta itemprop="should_publish" content="yes">
+<meta itemprop="canonical" content="https://bigassdigitalcalendar.com/">
+<style>
+    html {
+        width: 48in;
+        height: 34in;
+    }
+    body {
+        padding: 1em;
+    }
+    body main {
+        width: 100%;
+        height: 100%;
+    }
+
+    body header {
+        position: fixed;
+        top: 0;
+        left: 1em;
+        z-index: 1;
+    }
+    body header button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin: 0 0.3em 0 0;
+        padding: 0;
+        font-size: 1.3em;
+        line-height: 1em;
+    }
+    body header button::before {
+        content: "\21F1";
+    }
+    main header {
+        position: fixed;
+        left: 1em;
+        top: 50px;
+    }
+    main header h2 {
+        padding: 0;
+        margin: 0;
+    }
+    table {
+        width: 100%;
+        height: 100%;
+        border-collapse: collapse;
+        margin-top: 100px;
+        background-color: white;
+    }
+    th {
+        border: 1px solid black;
+        vertical-align: top;
+        min-width: 100px;
+        padding: 5px;
+        text-align: left;
+        text-transform: uppercase;
+    }
+    th span {
+        display: inline-block;
+    }
+    td {
+        border: 1px solid black;
+        padding: 5px;
+        vertical-align: top;
+    }
+    td span {
+        display: inline-block;
+        padding-right: 5px;
+    }
+    th, td {
+        text-transform: uppercase;
+    }
+    table:fullscreen {
+        font-size: 9px;
+    }
+    .weekend {
+        background-color: lightgray;
+    }
+    td div:first-child {
+        vertical-align: top;
+    }
+    
+</style>
+<header>
+    <h2>
+        <button id="fullScreenButton"></button><span>2024</span> <span>Calendar</span>
+    </h2>
+</header>
+<table></table>
+<script type="module">
+    import MakeKeyValueObservable from '/lib/MakeKeyValueObservable.mjs'
+    class PageTitle {
+        constructor(container, model, delegate) {
+            this.container = container || document.body
+            this.model = model
+            this.delegate = delegate
+            this.model.observe('date', this)
+        }
+        update (key, old, value) {
+            this.container.textContent = value.getFullYear() + ' Calendar'
+        }
+    }
+    class Title {
+        #editor = null
+        #title = null
+        constructor(container, model, delegate) {
+            this.container = container || document.body
+            this.model = model
+            this.delegate = delegate
+            this.container.addEventListener('dblclick', this.#switchToEditMode.bind(this), true)
+            this.#editor = this.container.querySelector('span')
+            this.#editor.addEventListener('blur', this.#save.bind(this), true)
+            this.#editor.addEventListener('keydown', this.#keyDown.bind(this), true)
+            this.model.observe('date', this)
+        }
+        #save (e) {
+            e.preventDefault()
+            this.model.date = new Date(this.#editor.textContent.trim(), 0)
+            this.#editor.contentEditable = false
+        }
+        #keyDown (e) {
+            this.#handleArrowUpAndDown(e.key)
+            if (e.key === 'Enter') {
+                this.#editor.blur()
+            }
+        }
+        #handleArrowUpAndDown (key) {
+            if (key === 'ArrowUp') {
+                this.#editor.textContent = new Number(this.#editor.textContent) + 1
+            }
+            if (key === 'ArrowDown') {
+                this.#editor.textContent = new Number(this.#editor.textContent) - 1
+            }
+        }
+        #switchToEditMode () {
+            this.#editor.contentEditable = true
+            this.#editor.focus()
+        }
+        update (key, old, value) {
+            this.#editor.textContent = value.getFullYear()
+        }
+    }
+    class Calendar {
+        #rows = 12
+        #shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        #shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat']
+        #year = 2024
+        constructor(container, model, delegate) {
+            this.container = container || document.body
+            this.model = model
+            this.delegate = delegate
+            this.model.observe('date', this)
+        }
+        update (key, old, value) {
+            this.#year = value.getFullYear()
+            this.render()
+        }
+        render () {
+            this.container.innerHTML = ''
+            for (let i = 0; i < this.#rows; i++) {
+                let date = new Date(this.#year, i, 1)
+                let row = document.createElement('tr')
+                let header = document.createElement('th')
+                let monthSpan = document.createElement('span')
+                monthSpan.textContent = this.#shortMonths[i]
+                header.appendChild(monthSpan)
+                row.appendChild(header)
+                // loop over the days of the month
+                while (date.getMonth() === i) {
+                    let cell = document.createElement('td')
+                    if (date.getDay() === 0 || date.getDay() === 6) {
+                        cell.className = 'weekend'
+                    }
+                    // fill cell inner html with the day string (mon, tue, wed, thur, fri, sat, sun) and day number
+                    cell.innerHTML = '<span>' + date.getDate() + '</span><span>' + this.#shortDays[date.getDay()] + '</span>'
+                    row.appendChild(cell)
+                    date.setDate(date.getDate() + 1)
+                }
+
+                this.container.appendChild(row)
+            }
+        }
+    }
+    class App {
+        constructor (model) {
+            this.views = []
+            this.model = model
+            window.addEventListener('popstate', e => {
+                let date = new Date(e.state?.year ?? new Date().getFullYear(), 0, 1)
+                model.stopObserving('date', this)
+                model.date = date
+                model.observe('date', this)
+            })
+            model.observe('date', this)
+        }
+        update (key, old, value) {
+            if (old && value.getFullYear() === old.getFullYear()) return
+            if (value.getFullYear() !== new Date().getFullYear()) {
+                window.history.pushState({year: value.getFullYear()}, '', '/?year=' + value.getFullYear())
+            } else {
+                window.history.pushState({}, '', '/')
+            }
+        }
+    }
+    const requestedDate = (search) => {
+        return search.replace('?', '').split('=').reduce((acc, cur, i, arr) => {
+            if (i % 2 === 0) {
+                acc[cur] = arr[i + 1]
+            }
+            return acc
+        }, {year: new Date().getFullYear()})
+    }
+
+    const model = MakeKeyValueObservable({date: null})
+    const app = new App(model)
+    let calendar = new Calendar(document.querySelector('table'), model, app)
+    app.views.push(new Title(document.querySelector('h2'), model, app))
+    app.views.push(calendar)
+    app.views.push(new PageTitle(document.querySelector('title'), model, app))
+    model.date = new Date(requestedDate(window.location.search)?.year ?? new Date().getFullYear(), 0, 1)
+    window.model = model
+    window.app = app
+    document.querySelector('#fullScreenButton').addEventListener('click', () => {
+        calendar.container.requestFullscreen()
+    })
+</script>
+    </main>
+  </body>
+</html>

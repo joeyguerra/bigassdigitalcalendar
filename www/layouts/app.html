@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <base href="./"/>
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src https:"/>-->
+    <title>${meta.title ?? 'App'}</title>
+    <meta name="author" content="Joey Guerra"/>
+    <meta name="description" content="${meta.summary ?? 'Big Ass Digital Calendar'}"/>
+    <meta property="og:title" content="${meta.title ?? 'Big Ass Digital Calendar'}"/>
+    <meta property="og:description" content="${meta.summary ?? 'Big Ass Digital Calendar'}"/>
+    <meta property="og:image" content="/imgs/joey-g-boss-pic.jpg"/>
+    <meta property="og:site_name" content="${meta.title ?? 'Big Ass Digital Calendar'}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+    <link rel="apple-touch-icon" href="favicon_package_v0/apple-touch-icon.png"/>
+    <meta name="msapplication-TileColor" content="#da532c"/>
+    <meta name="theme-color" content="#ffffff"/>
+    <meta name="apple-mobile-web-app-title" content="Joey Guerra"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon_package_v0/apple-touch-icon.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon_package_v0/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon_package_v0/favicon-16x16.png"/>
+    <link rel="manifest" href="favicon_package_v0/site.webmanifest"/>
+    <link rel="mask-icon" href="favicon_package_v0/safari-pinned-tab.svg" color="#5bbad5"/>
+    <link rel="shortcut icon" href="favicon_package_v0/favicon.ico"/>
+    <link rel="apple-touch-startup-image" href="launch.png"/>
+    <link rel="canonical" href="${meta.canonical}"/>
+    <link rel="preload" href="HubotSans/Hubot-Sans.woff2" as="font" type="font/woff2" crossorigin>
+  </head>
+  <style>
+    @font-face {
+      font-family: 'Hubot Sans';
+      src:
+        url('HubotSans/Hubot-Sans.woff2') format('woff2 supports variations'),
+        url('HubotSans/Hubot-Sans.woff2') format('woff2-variations');
+      font-weight: 200 900;
+      font-stretch: 75% 125%;
+    }
+    html, body {
+      font-family: "Hubot Sans","Hubot Sans Header Fallback",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    }
+
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <body>
+    <header>
+      <h1>${meta.title ?? 'App'}</h1>
+    </header>
+    <main role="main">
+      ${body}
+    </main>
+  </body>
+</html>
