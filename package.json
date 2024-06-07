@@ -4,8 +4,8 @@
   "description": "A simple helpful robot for your Company",
   "main": "index.js",
   "scripts": {
-    "start": "hubot",
-    "start:local": "node --watch ./node_modules/hubot/bin/Hubot.mjs",
+    "start": "hubot --name bigassdigitalcalendar",
+    "start:local": "node --watch-path=./lib ./node_modules/hubot/bin/Hubot.mjs --name bigassdigitalcalendar",
     "test": "node --test",
     "build": "ls -alt _site"
   },
