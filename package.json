@@ -7,11 +7,15 @@
     "start": "hubot --name bigassdigitalcalendar",
     "start:local": "node --watch-path=./lib ./node_modules/hubot/bin/Hubot.mjs --name bigassdigitalcalendar",
     "test": "node --test",
+    "test:watch": "node --watch --test",
     "build": "ls -alt _site"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "jsdom": "^24.1.1"
+  },
   "dependencies": {
     "cheerio": "^1.0.0",
     "express-session": "^1.18.0",

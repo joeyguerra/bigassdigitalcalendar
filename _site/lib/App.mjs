@@ -1,5 +1,18 @@
 import MakeKeyValueObservable from '/lib/MakeKeyValueObservable.mjs'
 import { MarkdownConverter } from '/lib/MarkdownConverter.mjs'
+import { CalendarEvent } from '/lib/Models.mjs'
+import { DecisionStateBuilder } from '/lib/DecisionStateBuilder.mjs'
+import { CommandHandler } from '/lib/CommandHandler.mjs'
+import { CalendarViewBuilder } from '/lib/CalendarViewBuilder.mjs'
+import { CalendarView } from '/lib/CalendarView.mjs'
+
+function uuidBrowser() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16)
+    })
+}
+
 class PageTitle {
     constructor(container, model, delegate) {
         this.container = container || document.body
@@ -11,6 +24,7 @@ class PageTitle {
         this.container.textContent = value.getFullYear() + ' Calendar'
     }
 }
+
 class Title {
     #editor = null
     #title = null
@@ -51,87 +65,7 @@ class Title {
         this.#editor.textContent = value.getFullYear()
     }
 }
-class CellEditor {
-    #editor = null
-    #body = null
-    #converter = null
-    constructor(container, model, delegate, converter = new MarkdownConverter()) {
-        this.container = container || document.body
-        this.model = model
-        this.delegate = delegate
-        this.#converter = converter
-        this.container.addEventListener('dblclick', this.#switchToEditMode.bind(this), true)
-        this.#editor = this.container.querySelector('.editable')
-        this.#editor.addEventListener('blur', this.#save.bind(this), true)
-        this.#editor.addEventListener('keydown', this.#keyDown.bind(this), true)
-        this.model.observe('body', this)
-    }
-    #save (e) {
-        e.preventDefault()
-        this.#editor.contentEditable = false
-        console.log(this.#editor.innerHTML, this.model.body)
-        this.model.body = this.#editor.innerHTML.replace(/<br>/g, '\n')
-    }
-    #keyDown (e) {
-        if (!e.shiftKey && e.key === 'Enter') {
-            this.#editor.blur()
-        }
-    }
-    #stripAllHtml (html) {
-        return html.replace(/<[^>]*>?/gm, '')
-    }
-    #switchToEditMode () {
-        this.#editor.contentEditable = 'plaintext-only'
-        console.log('body is = ', this.model.body)
-        this.#editor.innerHTML = this.model.body.replace(/\n/g, '<br>')
-        this.#editor.focus()
-    }
-    update (key, old, value) {
-        this.#editor.innerHTML = this.#converter.toHtml(value)
-    }
-}
-class Calendar {
-    #rows = 12
-    #shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    #shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat']
-    #year = 2024
-    constructor(container, model, delegate) {
-        this.container = container || document.body
-        this.model = model
-        this.delegate = delegate
-        this.model.observe('date', this)
-    }
-    update (key, old, value) {
-        this.#year = value.getFullYear()
-        this.render()
-    }
-    render () {
-        this.container.innerHTML = ''
-        for (let i = 0; i < this.#rows; i++) {
-            let date = new Date(this.#year, i, 1)
-            let row = document.createElement('tr')
-            let header = document.createElement('th')
-            let monthSpan = document.createElement('span')
-            monthSpan.textContent = this.#shortMonths[i]
-            header.appendChild(monthSpan)
-            row.appendChild(header)
-            // loop over the days of the month
-            while (date.getMonth() === i) {
-                let td = document.createElement('td')
-                if (date.getDay() === 0 || date.getDay() === 6) {
-                    td.className = 'weekend'
-                }
-                // fill cell inner html with the day string (mon, tue, wed, thur, fri, sat, sun) and day number
-                td.innerHTML = '<span>' + date.getDate() + '</span><span>' + this.#shortDays[date.getDay()] + '</span><div class="editable"></div>'
-                let cell = new CellEditor(td, MakeKeyValueObservable({body: ''}), this)
-                row.appendChild(cell.container)
-                date.setDate(date.getDate() + 1)
-            }
 
-            this.container.appendChild(row)
-        }
-    }
-}
 class App {
     constructor (model) {
         this.views = []
@@ -143,6 +77,9 @@ class App {
             model.observe('date', this)
         })
         model.observe('date', this)
+    }
+    createElement(tag) {
+        return document.createElement(tag)
     }
     update (key, old, value) {
         if (old && value.getFullYear() === old.getFullYear()) return
@@ -162,10 +99,17 @@ function requestedDate (search) {
     }, {year: new Date().getFullYear()})
 }
 
+let eventSource = window.localStorage
+let queue = []
+let initialStateBuilder = new DecisionStateBuilder()
+let handler = new CommandHandler(initialStateBuilder, eventSource, queue)
+let nodeId = crypto.randomUUID()
+let calendarViewBuilder = new CalendarViewBuilder(null, handler, nodeId)
+
 window.addEventListener('DOMContentLoaded', () => {
     let model = MakeKeyValueObservable({date: null})
     let app = new App(model)
-    let calendar = new Calendar(document.querySelector('table'), model, app)
+    let calendar = new CalendarView(document.querySelector('table'), model, app, calendarViewBuilder)
     app.views.push(new Title(document.querySelector('h2'), model, app))
     app.views.push(calendar)
     app.views.push(new PageTitle(document.querySelector('title'), model, app))
@@ -175,4 +119,11 @@ window.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#fullScreenButton').addEventListener('click', () => {
         calendar.container.requestFullscreen()
     })
+    handler.start()
+    calendarViewBuilder.start()
+})
+
+window.addEventListener('beforeunload', e => {
+    handler.stop()
+    calendarViewBuilder.stop()
 })
