@@ -136,12 +136,20 @@
     td div:first-child {
         vertical-align: top;
     }
+
+    @media print {
+        header p {
+            display: none;
+        }
+    }
+
     
 </style>
 <header>
     <h2>
-        <button id="fullScreenButton"></button><span>2024</span> <span>Calendar</span>
+        <button id="fullScreenButton" title="Full Screen"></button><span>2024</span> <span>Calendar</span>
     </h2>
+    <p>Double click on the year to edit it. That will update the calendar to show the year you enter.</p>
 </header>
 <table></table>
 <script type="module" src="/lib/App.mjs"></script>

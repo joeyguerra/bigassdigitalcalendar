@@ -8,7 +8,10 @@
     "start:local": "node --watch-path=./lib ./node_modules/hubot/bin/Hubot.mjs --name bigassdigitalcalendar",
     "test": "node --test",
     "test:watch": "node --watch --test",
-    "build": "ls -alt _site"
+    "docker-build": "./docker-build.sh",
+    "local-deploy": "kubectl config use-context docker-desktop && kubectl apply -f charts/web/deployment.yaml -n default",
+    "push": "node --run docker-build && node --run local-deploy",
+    "build": "hubot --name bigassdigitalcalendar"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +22,7 @@
   "dependencies": {
     "cheerio": "^1.0.0",
     "express-session": "^1.18.0",
-    "hubot": "^11.3.0",
+    "hubot": "^11.3.2",
     "hubot-diagnostics": "^2.1.3",
     "hubot-help": "^2.1.5",
     "hubot-rules": "^2.1.1",

@@ -32,6 +32,7 @@ class Title {
         this.container = container || document.body
         this.model = model
         this.delegate = delegate
+        this.container.title = 'Double click to edit'
         this.container.addEventListener('dblclick', this.#switchToEditMode.bind(this), true)
         this.#editor = this.container.querySelector('span')
         this.#editor.addEventListener('blur', this.#save.bind(this), true)
